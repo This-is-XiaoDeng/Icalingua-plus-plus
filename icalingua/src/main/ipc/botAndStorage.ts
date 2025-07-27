@@ -4,6 +4,7 @@ import Cookies from '@icalingua/types/cookies'
 import GroupOfFriend from '@icalingua/types/GroupOfFriend'
 import IgnoreChatInfo from '@icalingua/types/IgnoreChatInfo'
 import LoginForm from '@icalingua/types/LoginForm'
+import OneBotLoginForm from '@icalingua/types/LoginForm'
 import SearchableFriend from '@icalingua/types/SearchableFriend'
 import { ipcMain, screen, shell } from 'electron'
 import getCharCount from '../../utils/getCharCount'
@@ -26,6 +27,18 @@ import ui from '../utils/ui'
 let adapter: Adapter
 if (getConfig().adapter === 'oicq') adapter = oicqAdapter
 else if (getConfig().adapter === 'socketIo') adapter = socketIoAdapter
+
+// 动态代理对象，每次访问时返回当前 adapter 的方法
+export const adapterProxy = new Proxy({} as Adapter, {
+    get(_, methodName: keyof Adapter) {
+        return (...args: any[]) => {
+            if (typeof adapter[methodName] === 'function') {
+                return (adapter[methodName] as Function)(...args)
+            }
+            throw new Error(`Method ${String(methodName)} not found in adapter`)
+        }
+    },
+})
 
 export const {
     sendMessage,
@@ -75,7 +88,7 @@ export const {
     getDisabledFeatures,
     sendGroupPoke,
     getPrivateFileUrl,
-} = adapter
+} = adapterProxy
 export const fetchLatestHistory = (roomId: number) => {
     let buffer: Buffer
     let uid = roomId
@@ -93,7 +106,13 @@ export const getCookies = async (domain: CookiesDomain): Promise<Cookies> => {
 }
 
 ipcMain.handle('getDisabledFeatures', () => getDisabledFeatures())
-ipcMain.on('createBot', (event, form: LoginForm) => createBot(form))
+ipcMain.on('createBot', (event, form: LoginForm) => {
+    adapter = oicqAdapter
+    createBot(form)
+})
+ipcMain.on('connectOneBotImpl', (event, form: OneBotLoginForm) => {
+    adapter = socketIoAdapter
+})
 ipcMain.on('randomDevice', (event, username: number) => {
     randomDevice(username)
 })
