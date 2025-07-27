@@ -121,7 +121,6 @@ ipcMain.on('createBot', (event, form: LoginForm) => {
 ipcMain.on('connectOneBotImpl', (event, form: OneBotLoginForm) => {
     adapter = socketIoAdapter
     const port = getRandomInt(30000, 65535)
-    // TODO 使用 authorization 而不是 query 传递 access token
     initBridge(port, form.url)
     setupBuiltinBridge(port)
     const fakeLoginForm: LoginForm = {

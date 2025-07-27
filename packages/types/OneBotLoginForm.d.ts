@@ -1,5 +1,4 @@
 type OneBotLoginForm = {
-    access_token: string
     url: string
     autologin?: boolean
     storageType: 'sqlite'

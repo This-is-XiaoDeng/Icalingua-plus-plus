@@ -1,5 +1,12 @@
 <template>
     <div>
+        <h1 class="title">
+            <span>
+                {{ $route.query.bridge === 'true' ? '配置 Bridge 服务器' : '登录' }}
+            </span>
+            <span>Version {{ ver }} with OneBot-Patch</span>
+        </h1>
+
         <el-radio-group v-model="loginType" size="mini">
             <el-radio-button label="oicq">传统 OICQ</el-radio-button>
             <el-radio-button label="onebot">OneBot 11</el-radio-button>
@@ -16,9 +23,12 @@
             >
                 <el-form-item prop="URL" v-if="$route.query.disableIdLogin === 'false'">
                     <el-input type="text" placeholder="正向 Websocket 服务器地址" v-model="onebotForm.url" />
-                </el-form-item>
-                <el-form-item prop="AccessToken" v-if="$route.query.disableIdLogin === 'false'">
-                    <el-input type="text" placeholder="授权令牌" v-model="onebotForm.accessToken" />
+                    <ul>
+                        <li>此功能仅支持 OneBot 11 正向 WebSocket。</li>
+                        <li>如果有，在 URL 后追加 ?access_token=<strong>AccessToken</strong> 传递 Access Token。</li>
+                        <li>建议提前开启 OneBot IMPL, 如 NapCat 等。</li>
+                        <li>需要开启 OneBot IMPL 中的<strong>上报自身消息</strong>, 否则不能实时看到自己发的消息。</li>
+                    </ul>
                 </el-form-item>
                 <!-- <el-form-item prop="autologin">
                     <span class="el-form-item__label">自动登陆</span>
@@ -41,12 +51,6 @@
                 :disabled="disabled"
                 label-position="left"
             >
-                <h1 class="title">
-                    <span>
-                        {{ $route.query.bridge === 'true' ? '配置 Bridge 服务器' : '登录' }}
-                    </span>
-                    <span>Version {{ ver }}</span>
-                </h1>
                 <el-form-item prop="username" v-if="$route.query.disableIdLogin === 'false'">
                     <el-input type="text" placeholder="QQ ID" v-model.number="form.username" />
                 </el-form-item>
