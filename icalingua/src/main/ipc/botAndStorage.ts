@@ -14,7 +14,7 @@ import { newIcalinguaWindow } from '../../utils/IcalinguaWindow'
 import oicqAdapter from '../adapters/oicqAdapter'
 import socketIoAdapter from '../adapters/socketIoAdapter'
 import atCache from '../utils/atCache'
-import { getConfig } from '../utils/configManager'
+import { getConfig, setupBuiltinBridge } from '../utils/configManager'
 import errorHandler from '../utils/errorHandler'
 import getFriends from '../utils/getFriends'
 import * as themes from '../utils/themes'
@@ -123,9 +123,7 @@ ipcMain.on('connectOneBotImpl', (event, form: OneBotLoginForm) => {
     const port = getRandomInt(30000, 65535)
     // TODO 使用 authorization 而不是 query 传递 access token
     initBridge(port, form.url)
-    getConfig().adapter = 'socketIo'
-    getConfig().server = `ws://127.0.0.1:${port}`
-    getConfig().privateKey = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+    setupBuiltinBridge(port)
     const fakeLoginForm: LoginForm = {
         username: -1,
         password: '',

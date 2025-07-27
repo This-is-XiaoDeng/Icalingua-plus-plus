@@ -8,6 +8,7 @@ process.on('unhandledRejection', (error) => {
 })
 
 export function initBridge(port: number, wsUrl: string) {
+    console.log(`正在 127.0.0.1:${port} 上开启 Icalingua-Bidge-OICQ`)
     const adapter: typeof oicqAdapter = onebotAdapter
     config.onebot = wsUrl
     initSocketIo(adapter, port)

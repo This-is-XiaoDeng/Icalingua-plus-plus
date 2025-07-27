@@ -2,6 +2,7 @@
  * 所有的全局配置文件里面的东西还有初始设置啥的都在这里面
  */
 import AllConfig from '@icalingua/types/AllConfig'
+import ConfigDiff from '@icalingua/types/ConfigDiff'
 import Aria2Config from '@icalingua/types/Aria2Config'
 import LoginForm from '@icalingua/types/LoginForm'
 import OnlineStatusType from '@icalingua/types/OnlineStatusType'
@@ -18,11 +19,23 @@ const oldConfigFilePath = argv.config || path.join(app.getPath('userData'), '../
 
 let config: AllConfig
 
-export const saveConfigFile = () => fs.writeFileSync(configFilePath, YAML.stringify(config), 'utf8')
+let configDiff: ConfigDiff = {}
+export const saveConfigFile = () =>
+    fs.writeFileSync(configFilePath, YAML.stringify({ ...config, ...configDiff }), 'utf8')
 /**
  * 要记得保存哦
  */
 export const getConfig = () => config
+
+export function setupBuiltinBridge(port: number) {
+    configDiff.adapter = config.adapter
+    configDiff.server = config.server
+    configDiff.privateKey = config.privateKey
+
+    config.adapter = 'socketIo'
+    config.server = `ws://127.0.0.1:${port}`
+    config.privateKey = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+}
 
 const emptyLoginForm: LoginForm = {
     mdbConnStr: 'mongodb://localhost',

@@ -614,10 +614,17 @@ const adapter: Adapter = {
             data.b64img = 'data:' + type.mime + ';base64,' + fileContent.toString('base64')
             data.imgpath = null
         }
+        // 我不能确定到底是我写错了还是这个程序本身有问题
+        let serverURL: string
+        if (getConfig().server.startsWith('ws')) {
+            serverURL = `http${getConfig().server.substring(2)}`
+        } else {
+            serverURL = getConfig().server
+        }
         if (data.file && data.file.type.startsWith('audio/')) {
             socket.emit('requestToken', (token: string) =>
                 axios
-                    .post(getConfig().server + `/api/${token}/sendMessage`, data, {
+                    .post(serverURL + `/api/${token}/sendMessage`, data, {
                         proxy: false,
                     })
                     .catch((e) => {
@@ -634,11 +641,12 @@ const adapter: Adapter = {
         if (data.b64img) {
             socket.emit('requestToken', (token: string) =>
                 axios
-                    .post(getConfig().server + `/api/${token}/sendMessage`, data, {
+                    .post(serverURL + `/api/${token}/sendMessage`, data, {
                         proxy: false,
                     })
                     .catch((e) => {
                         errorHandler(e, true)
+
                         if (e.response.status === 413) {
                             ui.messageError('图片过大，无法发送')
                         } else {

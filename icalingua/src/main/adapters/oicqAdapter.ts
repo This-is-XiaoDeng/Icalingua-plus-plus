@@ -1353,6 +1353,9 @@ const adapter: OicqAdapter = {
         return friend || ((await bot.getStrangerInfo(user_id)).data as FriendInfo)
     },
     async sendOnlineData() {
+        if (getConfig().adapter === 'oicq') {
+            return
+        }
         let sysInfo = getBuildInfo()
         const updateInfo = getCachedUpdate()
         if (updateInfo && updateInfo.hasUpdate) {
