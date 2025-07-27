@@ -7,14 +7,9 @@ process.on('unhandledRejection', (error) => {
     console.error('UnhandledException: ', error)
 })
 
-let adapter: typeof oicqAdapter
-
-if (config.onebot) {
-    adapter = onebotAdapter
-} else {
-    adapter = oicqAdapter
+export function initBridge(port: number, wsUrl: string) {
+    const adapter: typeof oicqAdapter = onebotAdapter
+    config.onebot = wsUrl
+    initSocketIo(adapter, port)
+    adapter.createBot(userConfig.account)
 }
-
-initSocketIo(adapter)
-
-if (userConfig.account.autologin) adapter.createBot(userConfig.account)

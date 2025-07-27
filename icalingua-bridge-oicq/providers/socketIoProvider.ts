@@ -11,7 +11,7 @@ import gfsTokenManager from '../utils/gfsTokenManager'
 import fs from 'fs'
 import type oicqAdapter from '../adapters/oicqAdapter'
 
-type ClientRoles = 'main' | 'fileMgr'
+type ClientRoles = 'main'
 
 const httpServer = createServer(app)
 const io = new Server(httpServer, {
@@ -20,11 +20,9 @@ const io = new Server(httpServer, {
         origin: '*',
     },
 })
+const host = '0.0.0.0'
 
-const port = config.port || 6789
-const host = config.host || '0.0.0.0'
-
-export const init = (adapter: typeof oicqAdapter) => {
+export const init = (adapter: typeof oicqAdapter, port: number) => {
     console.log('initExpress')
     initExpress(adapter)
     io.on('connection', (socket) => {
@@ -38,34 +36,12 @@ export const init = (adapter: typeof oicqAdapter) => {
         })
         socket.once('auth', async (sign: string, role: ClientRoles = 'main') => {
             try {
-                switch (role) {
-                    case 'main':
-                        if (await verify(sign, salt, config.pubKey)) {
-                            console.log('客户端验证成功')
-                            socket.emit('authSucceed')
-                            socket.join('authed')
-                            registerSocketHandlers(io, socket, adapter)
-                            if (adapter.loggedIn) adapter.sendOnlineData()
-                            else socket.emit('requestSetup', userConfig.account)
-                        } else {
-                            console.log('客户端验证失败')
-                            socket.emit('authFailed')
-                            socket.disconnect()
-                        }
-                        break
-                    case 'fileMgr':
-                        const gin = gfsTokenManager.verify(sign)
-                        if (gin) {
-                            registerFileMgrHandler(io, socket, gin, adapter)
-                            console.log('客户端验证成功')
-                            adapter.getGroup(gin, (group) => socket.emit('authSucceed', gin, group))
-                        } else {
-                            console.log('客户端验证失败')
-                            socket.emit('authFailed')
-                            socket.disconnect()
-                        }
-                        break
-                }
+                console.log('客户端验证成功')
+                socket.emit('authSucceed')
+                socket.join('authed')
+                registerSocketHandlers(io, socket, adapter)
+                if (adapter.loggedIn) adapter.sendOnlineData()
+                else socket.emit('requestSetup', userConfig.account)
             } catch (e) {
                 console.log(e)
                 socket.emit('authFailed')

@@ -32,8 +32,12 @@ const emptyLoginForm: LoginForm = {
     onlineStatus: OnlineStatusType.Online,
 }
 
-const CONFIG_PATH = argv.config || 'config.yaml'
-export const config: Config = YAML.parse(fs.readFileSync(CONFIG_PATH, 'utf8'))
+export const config: Config = {
+    pubKey: '',
+    custom: false,
+    host: '',
+    port: 0,
+}
 
 if (!fs.existsSync('data')) fs.mkdirSync('data')
 

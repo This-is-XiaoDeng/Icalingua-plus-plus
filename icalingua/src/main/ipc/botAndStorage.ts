@@ -2,12 +2,13 @@ import Adapter, { CookiesDomain } from '@icalingua/types/Adapter'
 import AtCacheItem from '@icalingua/types/AtCacheElem'
 import Cookies from '@icalingua/types/cookies'
 import GroupOfFriend from '@icalingua/types/GroupOfFriend'
+
 import IgnoreChatInfo from '@icalingua/types/IgnoreChatInfo'
 import LoginForm from '@icalingua/types/LoginForm'
-import OneBotLoginForm from '@icalingua/types/LoginForm'
+import OneBotLoginForm from '@icalingua/types/OneBotLoginForm'
 import SearchableFriend from '@icalingua/types/SearchableFriend'
 import { ipcMain, screen, shell } from 'electron'
-import getCharCount from '../../utils/getCharCount'
+import { initBridge } from 'icalingua-bridge-oicq'
 import getWinUrl from '../../utils/getWinUrl'
 import { newIcalinguaWindow } from '../../utils/IcalinguaWindow'
 import oicqAdapter from '../adapters/oicqAdapter'
@@ -105,13 +106,34 @@ export const getCookies = async (domain: CookiesDomain): Promise<Cookies> => {
     return Object.fromEntries(strCookies.split('; ').map((pair) => pair.split('=')))
 }
 
+function getRandomInt(min: number, max: number): number {
+    min = Math.ceil(min)
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
 ipcMain.handle('getDisabledFeatures', () => getDisabledFeatures())
 ipcMain.on('createBot', (event, form: LoginForm) => {
     adapter = oicqAdapter
+    getConfig().adapter = 'oicq'
     createBot(form)
 })
 ipcMain.on('connectOneBotImpl', (event, form: OneBotLoginForm) => {
     adapter = socketIoAdapter
+    const port = getRandomInt(30000, 65535)
+    // TODO 使用 authorization 而不是 query 传递 access token
+    initBridge(port, form.url)
+    getConfig().adapter = 'socketIo'
+    getConfig().server = `ws://127.0.0.1:${port}`
+    getConfig().privateKey = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+    const fakeLoginForm: LoginForm = {
+        username: -1,
+        password: '',
+        protocol: 1,
+        storageType: 'sqlite',
+        mdbConnStr: 'mongodb://localhost',
+    }
+    createBot(fakeLoginForm)
 })
 ipcMain.on('randomDevice', (event, username: number) => {
     randomDevice(username)

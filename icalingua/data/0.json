@@ -1,0 +1,1 @@
+{"account":{"mdbConnStr":"mongodb://localhost","rdsHost":"127.0.0.1","storageType":"sqlite","sqlHost":"127.0.0.1","sqlUsername":"","sqlPassword":"","sqlDatabase":"","username":1552257261,"password":"","protocol":5,"autologin":false,"onlineStatus":11}}

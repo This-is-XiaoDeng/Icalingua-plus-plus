@@ -17,9 +17,26 @@ export const initExpress = (adapter: typeof oicqAdapter) => {
         } else res.sendStatus(403).end()
     })
 }
+function getAppBasePath() {
+    try {
+        // Electron 环境
+        if (typeof require !== 'undefined' && require('electron')) {
+            const { app } = require('electron')
+            return app.getAppPath()
+        }
+        // 常规 Node.js 环境
+        return require.main ? require.main.path : process.cwd()
+    } catch (e) {
+        return process.cwd()
+    }
+}
 
-app.use('/file-manager', express.static(path.join(__dirname, '../static/file-manager')))
-app.use('/records', express.static(path.join(require.main ? require.main.path : process.cwd(), 'data', 'records')))
+const basePath = getAppBasePath()
+const staticPath = path.join(basePath, 'static', 'file-manager')
+const recordsPath = path.join(basePath, 'data', 'records')
+
+app.use('/file-manager', express.static(staticPath))
+app.use('/records', express.static(recordsPath))
 app.get('/ping', (req, res) => {
     res.json({
         code: '200',

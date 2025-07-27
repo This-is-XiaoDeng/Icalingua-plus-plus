@@ -412,11 +412,19 @@ const adapter: Adapter = {
             ...cachedOnlineData,
             isSteamVrRunning: processes.list.some((e) => e.name.toLowerCase() === 'vrserver.exe'),
         })
+        // ui.sendOnlineData({
+        //     online: bot.isOnline(),
+        //     nick: bot.nickname,
+        //     uin: bot.uin,
+        //     priority: getConfig().priority,
+        //     sysInfo,
+        //     updateCheck: getConfig().updateCheck,
+        // })
         ui.setAllRooms(rooms)
         ui.setAllChatGroups(chatGroups)
-        if (!updateInfo) {
-            checkUpdate().then(adapter.sendOnlineData)
-        }
+        // if (!updateInfo) {
+        //     checkUpdate().then(adapter.sendOnlineData)
+        // }
     },
     getIgnoredChats(): Promise<IgnoreChatInfo[]> {
         return new Promise((resolve) => socket.emit('getIgnoredChats', resolve))
